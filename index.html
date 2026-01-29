@@ -3,168 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yamaha Employee Management System</title>
+  <title>Yamaha Employee System - Login</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
-    .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1 { text-align: center; color: #d22f27; }
-    .login { display: none; text-align: center; }
-    .dashboard { display: none; }
-    .stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
-    .stat { background: #eaeaea; padding: 10px; border-radius: 5px; text-align: center; }
-    .user-list { margin-top: 20px; }
-    .user-card { border: 1px solid #ccc; padding: 10px; margin: 10px 0; display: flex; align-items: center; }
-    .user-card img { width: 60px; height: 80px; margin-right: 10px; border-radius: 5px; }
-    .user-card div { flex: 1; }
-    button { background: #d22f27; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 5px; }
-    button:hover { background: #b02020; }
-    .form { margin-top: 20px; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .login { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; }
     input { display: block; width: 100%; margin: 10px 0; padding: 8px; }
-    .logout { text-align: right; margin-bottom: 20px; }
+    button { background: #d22f27; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #b02020; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="login" id="login">
-      <h1>Login to Yamaha System</h1>
-      <input type="text" id="username" placeholder="Username" value="admin">
-      <input type="password" id="password" placeholder="Password" value="password">
-      <button onclick="login()">Login</button>
-    </div>
-    
-    <div class="dashboard" id="dashboard">
-      <div class="logout"><button onclick="logout()">Logout</button></div>
-      <h1>Employee Dashboard</h1>
-      <div class="stats">
-        <div class="stat"><h3>Total Users</h3><p id="total-users">0</p></div>
-        <div class="stat"><h3>Active Users</h3><p id="active-users">0</p></div>
-      </div>
-      <button onclick="showAddForm()">Add New User</button>
-      <div class="form" id="add-form" style="display: none;">
-        <h2>Add User</h2>
-        <input type="text" id="new-name" placeholder="Name">
-        <input type="text" id="new-id" placeholder="ID Number">
-        <input type="file" id="new-photo" accept="image/*" placeholder="Upload Photo">
-        <button onclick="addUser()">Add User</button>
-        <button onclick="hideAddForm()">Cancel</button>
-      </div>
-      <div class="user-list" id="user-list"></div>
-    </div>
+  <div class="login">
+    <h1>Login to Yamaha System</h1>
+    <input type="text" id="username" placeholder="Username" value="admin">
+    <input type="password" id="password" placeholder="Password" value="password">
+    <button onclick="login()">Login</button>
   </div>
 
   <script>
-    let users = JSON.parse(localStorage.getItem('users')) || [];
-    let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-
     function login() {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       if (username === 'admin' && password === 'password') {
-        isLoggedIn = true;
         localStorage.setItem('isLoggedIn', 'true');
-        showDashboard();
+        window.location.href = 'dashboard.html';
       } else {
         alert('Invalid credentials');
       }
-    }
-
-    function logout() {
-      isLoggedIn = false;
-      localStorage.setItem('isLoggedIn', 'false');
-      showLogin();
-    }
-
-    function showLogin() {
-      document.getElementById('login').style.display = 'block';
-      document.getElementById('dashboard').style.display = 'none';
-    }
-
-    function showDashboard() {
-      document.getElementById('login').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      updateStats();
-      renderUsers();
-    }
-
-    function updateStats() {
-      document.getElementById('total-users').textContent = users.length;
-      document.getElementById('active-users').textContent = users.length;
-    }
-
-    function showAddForm() {
-      document.getElementById('add-form').style.display = 'block';
-    }
-
-    function hideAddForm() {
-      document.getElementById('add-form').style.display = 'none';
-    }
-
-    function addUser() {
-      const name = document.getElementById('new-name').value;
-      const id = document.getElementById('new-id').value;
-      const fileInput = document.getElementById('new-photo');
-      if (name && id && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const photo = e.target.result; // Base64 string
-          users.push({ name, id, photo });
-          localStorage.setItem('users', JSON.stringify(users));
-          updateStats();
-          renderUsers();
-          hideAddForm();
-          document.getElementById('new-name').value = '';
-          document.getElementById('new-id').value = '';
-          fileInput.value = '';
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        alert('Please fill all fields and select a photo.');
-      }
-    }
-
-    function editUser(index) {
-      const user = users[index];
-      const newName = prompt('Edit Name:', user.name);
-      const newId = prompt('Edit ID:', user.id);
-      if (newName && newId) {
-        users[index] = { name: newName, id: newId, photo: user.photo };
-        localStorage.setItem('users', JSON.stringify(users));
-        renderUsers();
-      }
-    }
-
-    function deleteUser(index) {
-      if (confirm('Delete this user?')) {
-        users.splice(index, 1);
-        localStorage.setItem('users', JSON.stringify(users));
-        updateStats();
-        renderUsers();
-      }
-    }
-
-    function renderUsers() {
-      const list = document.getElementById('user-list');
-      list.innerHTML = '';
-      users.forEach((user, index) => {
-        list.innerHTML += `
-          <div class="user-card">
-            <img src="${user.photo}" alt="Photo">
-            <div>
-              <strong>${user.name}</strong><br>
-              ID: ${user.id}
-            </div>
-            <button onclick="editUser(${index})">Edit</button>
-            <button onclick="deleteUser(${index})">Delete</button>
-          </div>
-        `;
-      });
-    }
-
-    // Initialize
-    if (isLoggedIn) {
-      showDashboard();
-    } else {
-      showLogin();
     }
   </script>
 </body>
