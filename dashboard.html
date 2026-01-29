@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yamaha Employee System - Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #d22f27; }
+    .nav { text-align: center; margin-bottom: 20px; }
+    .nav a { margin: 0 10px; text-decoration: none; color: #d22f27; font-weight: bold; }
+    .stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
+    .stat { background: #eaeaea; padding: 10px; border-radius: 5px; text-align: center; }
+    button { background: #d22f27; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #b02020; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <a href="dashboard.html">Dashboard</a> | <a href="users.html">Manage Users</a> | <button onclick="logout()">Logout</button>
+    </div>
+    <h1>Employee Dashboard</h1>
+    <div class="stats">
+      <div class="stat"><h3>Total Users</h3><p id="total-users">0</p></div>
+      <div class="stat"><h3>Active Users</h3><p id="active-users">0</p></div>
+    </div>
+  </div>
+
+  <script>
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+      window.location.href = 'index.html';
+    }
+
+    function logout() {
+      localStorage.setItem('isLoggedIn', 'false');
+      window.location.href = 'index.html';
+    }
+
+    function updateStats() {
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      document.getElementById('total-users').textContent = users.length;
+      document.getElementById('active-users').textContent = users.length;
+    }
+
+    updateStats();
+  </script>
+</body>
+</html>
