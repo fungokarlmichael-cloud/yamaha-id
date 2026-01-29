@@ -44,7 +44,7 @@
         <h2>Add User</h2>
         <input type="text" id="new-name" placeholder="Name">
         <input type="text" id="new-id" placeholder="ID Number">
-        <input type="text" id="new-photo" placeholder="Photo URL">
+        <input type="file" id="new-photo" accept="image/*" placeholder="Upload Photo">
         <button onclick="addUser()">Add User</button>
         <button onclick="hideAddForm()">Cancel</button>
       </div>
@@ -88,7 +88,7 @@
 
     function updateStats() {
       document.getElementById('total-users').textContent = users.length;
-      document.getElementById('active-users').textContent = users.length; // Assuming all are active
+      document.getElementById('active-users').textContent = users.length;
     }
 
     function showAddForm() {
@@ -102,16 +102,23 @@
     function addUser() {
       const name = document.getElementById('new-name').value;
       const id = document.getElementById('new-id').value;
-      const photo = document.getElementById('new-photo').value;
-      if (name && id) {
-        users.push({ name, id, photo });
-        localStorage.setItem('users', JSON.stringify(users));
-        updateStats();
-        renderUsers();
-        hideAddForm();
-        document.getElementById('new-name').value = '';
-        document.getElementById('new-id').value = '';
-        document.getElementById('new-photo').value = '';
+      const fileInput = document.getElementById('new-photo');
+      if (name && id && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const photo = e.target.result; // Base64 string
+          users.push({ name, id, photo });
+          localStorage.setItem('users', JSON.stringify(users));
+          updateStats();
+          renderUsers();
+          hideAddForm();
+          document.getElementById('new-name').value = '';
+          document.getElementById('new-id').value = '';
+          fileInput.value = '';
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        alert('Please fill all fields and select a photo.');
       }
     }
 
@@ -119,9 +126,8 @@
       const user = users[index];
       const newName = prompt('Edit Name:', user.name);
       const newId = prompt('Edit ID:', user.id);
-      const newPhoto = prompt('Edit Photo URL:', user.photo);
       if (newName && newId) {
-        users[index] = { name: newName, id: newId, photo: newPhoto };
+        users[index] = { name: newName, id: newId, photo: user.photo };
         localStorage.setItem('users', JSON.stringify(users));
         renderUsers();
       }
@@ -142,7 +148,7 @@
       users.forEach((user, index) => {
         list.innerHTML += `
           <div class="user-card">
-            <img src="${user.photo || 'https://via.placeholder.com/60x80'}" alt="Photo">
+            <img src="${user.photo}" alt="Photo">
             <div>
               <strong>${user.name}</strong><br>
               ID: ${user.id}
