@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yamaha Employee System - Manage Users</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #d22f27; }
+    .nav { text-align: center; margin-bottom: 20px; }
+    .nav a { margin: 0 10px; text-decoration: none; color: #d22f27; font-weight: bold; }
+    .user-list { margin-top: 20px; }
+    .user-card { border: 1px solid #ccc; padding: 10px; margin: 10px 0; display: flex; align-items: center; }
+    .user-card img { width: 60px; height: 80px; margin-right: 10px; border-radius: 5px; }
+    .user-card div { flex: 1; }
+    button { background: #d22f27; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #b02020; }
+    .form { margin-top: 20px; }
+    input { display: block; width: 100%; margin: 10px 0; padding: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <a href="dashboard.html">Dashboard</a> | <a href="users.html">Manage Users</a> | <button onclick="logout()">Logout</button>
+    </div>
+    <h1>Manage Users</h1>
+    <button onclick="showAddForm()">Add New User</button>
+    <div class="form" id="add-form" style="display: none;">
+      <h2>Add User</h2>
+      <input type="text" id="new-name" placeholder="Name">
+      <input type="text" id="new-id" placeholder="ID Number">
+      <input type="file" id="new-photo" accept="image/*">
+      <button onclick="addUser()">Add User</button>
+      <button onclick="hideAddForm()">Cancel</button>
+    </div>
+    <div class="user-list" id="user-list"></div>
+  </div>
+
+  <script>
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+      window.location.href = 'index.html';
+    }
+
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+
+    function logout() {
+      localStorage.setItem('isLoggedIn', 'false');
+      window.location.href = 'index.html';
+    }
+
+    function showAddForm() {
+      document.getElementById('add-form').style.display = 'block';
+    }
+
+    function hideAddForm() {
+      document.getElementById('add-form').style.display = 'none';
+    }
+
+    function addUser() {
+      const name = document.getElementById('new-name').value;
+      const id = document.getElementById('new-id').value;
+      const fileInput = document.getElementById('new-photo');
+      if (name && id && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const photo = e.target.result;
+          users.push({ name, id, photo });
+          localStorage.setItem('users', JSON.stringify(users));
+          renderUsers();
+          hideAddForm();
+          document.getElementById('new-name').value = '';
+          document.getElementById('new-id').value = '';
+          fileInput.value = '';
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+      } else {
+        alert('Please fill all fields and select a photo.');
+      }
+    }
+
+    function editUser(index) {
+      const user = users[index];
+      const newName = prompt('Edit Name:', user.name);
+      const newId = prompt('Edit ID:', user.id);
+      if (newName && newId) {
+        users[index] = { name: newName, id: newId, photo: user.photo };
+        localStorage.setItem('users', JSON.stringify(users));
+        renderUsers();
+      }
+    }
+
+    function deleteUser(index) {
+      if (confirm('Delete this user?')) {
+        users.splice(index, 1);
+        localStorage.setItem('users', JSON.stringify(users));
+        renderUsers();
+      }
+    }
+
+    function renderUsers() {
+      const list = document.getElementById('user-list');
+      list.innerHTML = '';
+      users.forEach((user, index) => {
+        list.innerHTML += `
+          <div class="user-card">
+            <img src="${user.photo}" alt="Photo">
+            <div>
+              <strong>${user.name}</strong><br>
+              ID: ${user.id}
+            </div>
+            <button onclick="editUser(${index})">Edit</button>
+            <button onclick="deleteUser(${index})">Delete</button>
+          </div>
+        `;
+      });
+    }
+
+    renderUsers();
+  </script>
+</body>
+</html>
