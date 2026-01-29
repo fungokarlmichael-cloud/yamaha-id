@@ -1,94 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Yamaha Employee ID</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yamaha Employee Management System</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #eaeff5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .id-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 320px;
-      padding: 24px 24px 32px;
-      text-align: center;
-    }
-
-    .logo {
-      font-weight: 800;
-      font-size: 28px;
-      color: #d22f27;
-      margin-bottom: 6px;
-    }
-
-    .company {
-      font-size: 10.5px;
-      color: #555;
-      margin-bottom: 16px;
-      letter-spacing: 0.1em;
-    }
-
-    img.photo {
-      width: 140px;
-      height: 160px;
-      border-radius: 8px;
-      border: 1.5px solid #ccc;
-      object-fit: cover;
-      margin-bottom: 18px;
-    }
-
-    .name {
-      font-weight: 700;
-      font-size: 18px;
-      margin-bottom: 6px;
-      color: #222;
-    }
-
-    .id-number {
-      font-size: 16px;
-      color: #444;
-      margin-bottom: 22px;
-    }
-
-    .barcode {
-      width: 100%;
-      height: 40px;
-      background: repeating-linear-gradient(
-        to right,
-        black 0,
-        black 2px,
-        white 2px,
-        white 4px
-      );
-      border-radius: 6px;
-      margin-top: 10px;
-    }
-
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #d22f27; }
+    .login { display: none; text-align: center; }
+    .dashboard { display: none; }
+    .stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
+    .stat { background: #eaeaea; padding: 10px; border-radius: 5px; text-align: center; }
+    .user-list { margin-top: 20px; }
+    .user-card { border: 1px solid #ccc; padding: 10px; margin: 10px 0; display: flex; align-items: center; }
+    .user-card img { width: 60px; height: 80px; margin-right: 10px; border-radius: 5px; }
+    .user-card div { flex: 1; }
+    button { background: #d22f27; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 5px; }
+    button:hover { background: #b02020; }
+    .form { margin-top: 20px; }
+    input { display: block; width: 100%; margin: 10px 0; padding: 8px; }
+    .logout { text-align: right; margin-bottom: 20px; }
   </style>
 </head>
 <body>
-  <div class="id-card">
-    <div class="logo">YAMAHA</div>
-    <div class="company">YAMAHA MOTOR PHILIPPINES, INC.</div>
-    <!-- Replace the src URL with actual photo if you want -->
-    <img
-      class="photo"
-      src="https://i.imgur.com/6fP41E3.jpg"
-      alt="Profile photo of employee"
-    />
-    <div class="name">KARL MICHAEL A. FUNGO</div>
-    <div class="id-number">17583</div>
-    <div class="barcode"></div>
+  <div class="container">
+    <div class="login" id="login">
+      <h1>Login to Yamaha System</h1>
+      <input type="text" id="username" placeholder="Username" value="admin">
+      <input type="password" id="password" placeholder="Password" value="password">
+      <button onclick="login()">Login</button>
+    </div>
+    
+    <div class="dashboard" id="dashboard">
+      <div class="logout"><button onclick="logout()">Logout</button></div>
+      <h1>Employee Dashboard</h1>
+      <div class="stats">
+        <div class="stat"><h3>Total Users</h3><p id="total-users">0</p></div>
+        <div class="stat"><h3>Active Users</h3><p id="active-users">0</p></div>
+      </div>
+      <button onclick="showAddForm()">Add New User</button>
+      <div class="form" id="add-form" style="display: none;">
+        <h2>Add User</h2>
+        <input type="text" id="new-name" placeholder="Name">
+        <input type="text" id="new-id" placeholder="ID Number">
+        <input type="text" id="new-photo" placeholder="Photo URL">
+        <button onclick="addUser()">Add User</button>
+        <button onclick="hideAddForm()">Cancel</button>
+      </div>
+      <div class="user-list" id="user-list"></div>
+    </div>
   </div>
+
+  <script>
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+    function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      if (username === 'admin' && password === 'password') {
+        isLoggedIn = true;
+        localStorage.setItem('isLoggedIn', 'true');
+        showDashboard();
+      } else {
+        alert('Invalid credentials');
+      }
+    }
+
+    function logout() {
+      isLoggedIn = false;
+      localStorage.setItem('isLoggedIn', 'false');
+      showLogin();
+    }
+
+    function showLogin() {
+      document.getElementById('login').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+    }
+
+    function showDashboard() {
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      updateStats();
+      renderUsers();
+    }
+
+    function updateStats() {
+      document.getElementById('total-users').textContent = users.length;
+      document.getElementById('active-users').textContent = users.length; // Assuming all are active
+    }
+
+    function showAddForm() {
+      document.getElementById('add-form').style.display = 'block';
+    }
+
+    function hideAddForm() {
+      document.getElementById('add-form').style.display = 'none';
+    }
+
+    function addUser() {
+      const name = document.getElementById('new-name').value;
+      const id = document.getElementById('new-id').value;
+      const photo = document.getElementById('new-photo').value;
+      if (name && id) {
+        users.push({ name, id, photo });
+        localStorage.setItem('users', JSON.stringify(users));
+        updateStats();
+        renderUsers();
+        hideAddForm();
+        document.getElementById('new-name').value = '';
+        document.getElementById('new-id').value = '';
+        document.getElementById('new-photo').value = '';
+      }
+    }
+
+    function editUser(index) {
+      const user = users[index];
+      const newName = prompt('Edit Name:', user.name);
+      const newId = prompt('Edit ID:', user.id);
+      const newPhoto = prompt('Edit Photo URL:', user.photo);
+      if (newName && newId) {
+        users[index] = { name: newName, id: newId, photo: newPhoto };
+        localStorage.setItem('users', JSON.stringify(users));
+        renderUsers();
+      }
+    }
+
+    function deleteUser(index) {
+      if (confirm('Delete this user?')) {
+        users.splice(index, 1);
+        localStorage.setItem('users', JSON.stringify(users));
+        updateStats();
+        renderUsers();
+      }
+    }
+
+    function renderUsers() {
+      const list = document.getElementById('user-list');
+      list.innerHTML = '';
+      users.forEach((user, index) => {
+        list.innerHTML += `
+          <div class="user-card">
+            <img src="${user.photo || 'https://via.placeholder.com/60x80'}" alt="Photo">
+            <div>
+              <strong>${user.name}</strong><br>
+              ID: ${user.id}
+            </div>
+            <button onclick="editUser(${index})">Edit</button>
+            <button onclick="deleteUser(${index})">Delete</button>
+          </div>
+        `;
+      });
+    }
+
+    // Initialize
+    if (isLoggedIn) {
+      showDashboard();
+    } else {
+      showLogin();
+    }
+  </script>
 </body>
 </html>
